@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+<title>Notes</title>
+
+<link rel="stylesheet" type="text/css" media="all"
+	href="../../css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" />
+
+<script type="text/javascript" th:src="@{/js/jquery.min.js}"
+	src="js/jquery.min.js"></script>
+<script type="text/javascript" th:src="@{/js/bootstrap.min.js}"
+	src="js/bootstrap.min.js"></script>
+</head>
+<body>
+	<nav class="navbar navbar-default">
+		<div class="container-fluid">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle collapsed"
+					data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+					aria-controls="navbar">
+					<span class="sr-only">Toggle navigation</span> <span
+						class="icon-bar"></span> <span class="icon-bar"></span> <span
+						class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand" href="#" th:text="${prova.turma}">1</a>
+			</div>
+
+			<div id="navbar" class="navbar-collapse collapse">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed"
+						data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+						aria-controls="navbar">
+						<span class="sr-only">Toggle navigation</span> <span
+							class="icon-bar"></span> <span class="icon-bar"></span> <span
+							class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand" href="#" th:text="${materia.nome}">1</a>
+				</div>
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed"
+						data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+						aria-controls="navbar">
+						<span class="sr-only">Toggle navigation</span> <span
+							class="icon-bar"></span> <span class="icon-bar"></span> <span
+							class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand" href="#" th:text="${tipoProva.nome}">1</a>
+				</div>
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed"
+						data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+						aria-controls="navbar">
+						<span class="sr-only">Toggle navigation</span> <span
+							class="icon-bar"></span> <span class="icon-bar"></span> <span
+							class="icon-bar"></span>
+					</button>
+					<!-- 
+					<a class="navbar-brand" href="#" th:text="${prova.anoLetivo}">1</a>
+					 -->
+				</div>
+
+				<ul class="nav navbar-nav navbar-right">
+					<li><a href="#">Sair</a></li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+
+
+	<div class="container">
+
+		<h1>Questões</h1>
+
+		<p>
+			<a href="/novaQuestao/1" th:href="@{/novaQuestao/__${prova.id}__}"
+				class="btn btn-primary"> <span class="glyphicon glyphicon-plus"
+				aria-hidden="true"></span> Novo
+			</a>
+			<a href="#" th:href="@{/}" class="btn btn-danger" role="button">Cancelar</a>
+			<a href="/imprimir/1" th:href="@{/imprimir/__${prova.id}__}" class="btn btn-primary" role="button">Imprimir</a>
+		</p>
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Id</th>
+					<th>Questão</th>
+					<th>Ações</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="questao : ${questoes}">
+					<td th:text="${questao.id}">1</td>
+					<td th:text="${questao.questaoShort}">Test</td>
+					<td><a class="btn btn-info" href="/editarQuestao/1"
+						th:href="@{/editarQuestao/__${questao.id}__}"> <span
+							class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+							Editar
+					</a> <a class="btn btn-info" href="/questaoDelete/1"
+						th:href="@{/questaoDelete/__${questao.id}__}"> <span
+							class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+							Excluir
+					</a></td>
+				</tr>
+			</tbody>
+		</table>
+			<div class="form-group">
+				<label th:text="${mensagem}" style="color:red">1</label>
+			</div>
+		
+	</div>
+</body>
+</html>

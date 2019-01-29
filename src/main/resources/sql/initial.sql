@@ -1,0 +1,10 @@
+insert into materiadto values (1, 'Português');
+insert into materiadto values (2, 'História');
+insert into materiadto values (3, 'Física');
+insert into materiadto values (4, 'Química');
+insert into materiadto values (5, 'Filosofia');
+insert into materiadto values (6, 'Sociologia');
+insert into materiadto values (7, 'Geografia');
+insert into materiadto values (8, 'Arte');
+insert into materiadto values (9, 'Ed. Física');
+insert into materiadto values (10, 'Inglês');

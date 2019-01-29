@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+<title>Notes</title>
+
+<link rel="stylesheet" type="text/css" media="all"
+	href="../../css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" />
+
+<script type="text/javascript" th:src="@{/js/jquery.min.js}"
+	src="js/jquery.min.js"></script>
+<script type="text/javascript" th:src="@{/js/bootstrap.min.js}"
+	src="js/bootstrap.min.js"></script>
+</head>
+<body>
+	<div class="container">
+
+		<h1>AVALIAÇÃO INSTITUCIONAL DE CIÊNCIAS HUMANAS</h1>
+
+		<form class="form-group" action="/listaQuestoes"
+			th:action="@{/listaQuestoes}" method="post">
+			<div class="form-group blu-margin">
+				<label for="dropTipoProva">Tipo de Prova</label>
+				<select class="form-control" th:field="${item.idTipoProva}"
+					id="dropTipoProva">
+					<option value="0" th:text="Selecione"></option>
+					<option th:each="tipoProva : ${tiposProva}" th:value="${tipoProva.id}"
+						th:text="${tipoProva.nome}"></option>
+				</select>
+			</div>
+			
+			<div class="form-group blu-margin">
+				<label for="dropMateria">Matéria</label>
+				<select class="form-control" th:field="${item.idMateria}"
+					id="dropMateria">
+					<option value="0" th:text="Selecione"></option>
+					<option th:each="materia : ${materias}" th:value="${materia.id}"
+						th:text="${materia.nome}"></option>
+				</select>
+			</div>
+			
+			<!-- 
+			<div class="form-group blu-margin">
+				<label for="dropAno">Ano</label>
+				<select class="form-control" th:field="${item.anoLetivo}"
+					id="dropAno">
+					<option value="0" th:text="Selecione"></option>
+					<option th:each="ano : ${anos}" th:value="${ano.ano}"
+						th:text="${ano.ano}"></option>
+				</select>
+			</div>
+
+			<div class="form-group blu-margin">
+				<label for="dropTurma">Turma</label>
+				<select class="form-control" th:field="${item.turma}"
+					id="dropTurma">
+					<option value="0" th:text="Selecione"></option>
+					<option th:each="turma : ${turmas}" th:value="${turma.turma}"
+						th:text="${turma.turma}"></option>
+				</select>
+			</div>
+			-->
+			
+				<div class="form-group blu-margin">
+				<label for="habilidade">Turma</label> <input type="text"
+					class="form-control" id="turma" th:field="${item.turma}" />
+			</div>			
+
+			<button type="submit" class="btn btn-primary">Salvar</button>
+			<a href="#" th:href="@{/}" class="btn btn-danger" role="button">Cancelar</a>
+		</form>
+
+	</div>
+
+</body>
+</html>
