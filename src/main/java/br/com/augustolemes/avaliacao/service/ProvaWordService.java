@@ -4,6 +4,6 @@ import br.com.augustolemes.avaliacao.dto.ProvaDTO;
 
 public interface ProvaWordService {
 	
-	public void readDocxFile(ProvaDTO prova,String fileName);
+	public void readDocxFile(ProvaDTO prova,String fileName) throws Exception;
 
 }

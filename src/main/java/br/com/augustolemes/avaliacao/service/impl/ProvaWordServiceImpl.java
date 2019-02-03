@@ -34,8 +34,8 @@ public class ProvaWordServiceImpl implements ProvaWordService {
 	@Value("${imagem.caminho}")
 	private String caminhoImagem;
 
-	public void readDocxFile(ProvaDTO prova, String fileName) {
-		try {
+	public void readDocxFile(ProvaDTO prova, String fileName) throws Exception{
+	
 			File file = new File(fileName);
 			FileInputStream fis = new FileInputStream(file.getAbsolutePath());
 			XWPFDocument document = new XWPFDocument(fis);
@@ -65,9 +65,7 @@ public class ProvaWordServiceImpl implements ProvaWordService {
 					new FileOutputStream(caminhoProva + prova.getTurma()+"_" +prova.getMateria().getNome() + ".docx"));
 			document.close();
 			fis.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		
 
 	}
 

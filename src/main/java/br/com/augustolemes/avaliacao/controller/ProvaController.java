@@ -258,10 +258,16 @@ public class ProvaController {
     public String imprimir(Model model, @PathVariable(required = false, name = "id") Long id) {
     	model.addAttribute("mensagem","");
     	ProvaDTO prova = provaService.findProvaAllData(id);
+    	try {
+    		provaWordService.readDocxFile(prova, arquivoTemplate);
+    		model.addAttribute("mensagem","Prova gerada com sucesso");
+    	}catch (Exception e) {
+    		model.addAttribute("mensagem","Erro ao gerar a prova.");
+    		e.printStackTrace();
+    	}
     	
-    	provaWordService.readDocxFile(prova, arquivoTemplate);
     	
-    	model.addAttribute("mensagem","Prova gerada com sucesso");
+    	
         return voltarQuestao(model, prova.getQuestoes().get(0).getId());
     }      
 
