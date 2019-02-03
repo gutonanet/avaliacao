@@ -51,6 +51,7 @@ public class QuestaoServiceImpl implements QuestaoService{
 		dados.setHabilidade(questao.getHabilidade());
 		dados.setQuestao(questao.getQuestao());
 		dados.setIdProva(questao.getProva().getId());
+		dados.setContinuacaoQuestao(questao.getContinuacaoQuestao());
 		return dados;
 	}
 	
@@ -60,6 +61,7 @@ public class QuestaoServiceImpl implements QuestaoService{
 		questao.setQuestao(dados.getQuestao());
 		questao.setHabilidade(dados.getHabilidade());
 		questao.setTipoQuestao(dados.getTipoQuestao());
+		questao.setContinuacaoQuestao(dados.getContinuacaoQuestao());
 		questao.setProva(prova);
 		return questao;
 

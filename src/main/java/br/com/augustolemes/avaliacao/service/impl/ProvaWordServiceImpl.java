@@ -44,8 +44,10 @@ public class ProvaWordServiceImpl implements ProvaWordService {
 			for (int i = 1; i <= questoes.size(); i++) {
 				String questaoLocalizar = "QUESTAO" + i;
 				String questaoLocalizar2 = "HABILIDADE" + i;
+				String questaoLocalizar3 = "CONTINUACAO" + i;
 				QuestaoDTO questao = questoes.get(i - 1);
 				preencheProva(document, questaoLocalizar2, questao.getHabilidade(),null);
+				preencheProva(document, questaoLocalizar3, questao.getContinuacaoQuestao(),null);
 				boolean atualizou = preencheProva(document, questaoLocalizar, questao.getQuestao(), questao.getId());
 				if (atualizou) {
 					List<RespostaDTO> respostas = questao.getRespostasFormatted();
@@ -59,6 +61,7 @@ public class ProvaWordServiceImpl implements ProvaWordService {
 
 			}
 			removeTabela(document, "QUESTAO");
+			removeLinha(document, "CONTINUACAO");
 			removeLinha(document, "REMOVER");
 
 			document.write(

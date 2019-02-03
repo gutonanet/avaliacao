@@ -8,6 +8,16 @@ public class DadosQuestaoTO {
 	
 	private String questao;
 	
+	private String continuacaoQuestao;
+	
+	public String getContinuacaoQuestao() {
+		return continuacaoQuestao;
+	}
+
+	public void setContinuacaoQuestao(String continuacaoQuestao) {
+		this.continuacaoQuestao = continuacaoQuestao;
+	}
+
 	private String resposta;
 	
 	private Long idProva;

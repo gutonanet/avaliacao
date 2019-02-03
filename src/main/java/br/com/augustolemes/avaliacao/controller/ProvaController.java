@@ -115,11 +115,12 @@ public class ProvaController {
     	try {
         	if(file!= null) {
         		if(!"".equals(file.getOriginalFilename()))
-        			singleFileUpload(questao.getIdQuestao().toString(), file);
+        			singleFileUpload(q.getId().toString(), file);
         	}
     	}catch(Exception e) {
     		mensagemErro += " Erro ao efetuar o upload.";
     		model.addAttribute("mensagem",mensagemErro);
+    		e.printStackTrace();
     	}
 
 

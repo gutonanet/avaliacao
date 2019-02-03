@@ -87,6 +87,10 @@
 			<div class="form-group">
 				<label for="file">Imagem</label><input type="file" name="file" accept="image/x-png,image/bmp,image/jpeg" />
 			</div>
+			<div class="form-group">
+				<label for="continuacaoQuestao">Continuação Questão (Após imagem)</label> <textarea cols="200" rows="5" maxlength="2500"
+					class="form-control" id="continuacaoQuestao" th:field="${questao.continuacaoQuestao}"></textarea>
+			</div>
 			
 			<button type="submit" class="btn btn-primary">Salvar</button>
 			<a href="/voltarQuestao/1" th:href="@{/voltarQuestao/__${questao.idQuestao}__}" class="btn btn-danger" role="button">Cancelar</a>

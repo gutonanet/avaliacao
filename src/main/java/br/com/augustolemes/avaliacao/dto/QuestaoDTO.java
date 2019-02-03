@@ -24,6 +24,9 @@ public class QuestaoDTO {
 	@Column(length=2500)
 	private String questao;
 	
+	@Column(length=2500)
+	private String continuacaoQuestao;
+	
 	@Column
 	private String habilidade;
 	
@@ -118,9 +121,14 @@ public class QuestaoDTO {
 	
 	public List<RespostaDTO> getRespostasFormatted(){
 		List<RespostaDTO> lista5 = new ArrayList<>();
-		lista5.addAll(respostas);
+		List<RespostaDTO> listaRespostas = new ArrayList<>();
+		if(respostas != null && !respostas.isEmpty()) {
+			lista5.addAll(respostas);
+			listaRespostas.addAll(respostas);
+		}
+		
 		if(lista5.size() < 5) {
-			for(int i = respostas.size() -1; i < 5; i++) {
+			for(int i = listaRespostas.size() -1; i < 5; i++) {
 				RespostaDTO dto = new RespostaDTO();
 				dto.setResposta("REMOVER");
 				lista5.add(dto);
@@ -141,7 +149,16 @@ public class QuestaoDTO {
 
 	public void setHabilidade(String habilidade) {
 		this.habilidade = habilidade;
+	}
+
+	public String getContinuacaoQuestao() {
+		return continuacaoQuestao;
+	}
+
+	public void setContinuacaoQuestao(String continuacaoQuestao) {
+		this.continuacaoQuestao = continuacaoQuestao;
 	}	
+	
 	
 	
 
