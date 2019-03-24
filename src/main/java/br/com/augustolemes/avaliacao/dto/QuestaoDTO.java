@@ -24,9 +24,6 @@ public class QuestaoDTO {
 	@Column(length=2500)
 	private String questao;
 	
-	@Column(length=2500)
-	private String continuacaoQuestao;
-	
 	@Column
 	private String habilidade;
 	
@@ -36,16 +33,15 @@ public class QuestaoDTO {
 	@Column(length=2500)
 	private String resposta;
 	
-	@Lob
-	@Column
-	private byte[] profilePic;
-	
 	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name="prova_id")	
 	private ProvaDTO prova;
 	
 	@Transient
-	private List<RespostaDTO> respostas;
+	private List<RespostaDTO> respostas = new ArrayList<>();
+	
+	@Transient
+	private List<ImagemDTO> imagens= new ArrayList<>();
 
 	
 	public String getRespostaShort() {
@@ -98,14 +94,6 @@ public class QuestaoDTO {
 		this.resposta = resposta;
 	}
 
-	public byte[] getProfilePic() {
-		return profilePic;
-	}
-
-	public void setProfilePic(byte[] profilePic) {
-		this.profilePic = profilePic;
-	}
-
 	public ProvaDTO getProva() {
 		return prova;
 	}
@@ -151,12 +139,12 @@ public class QuestaoDTO {
 		this.habilidade = habilidade;
 	}
 
-	public String getContinuacaoQuestao() {
-		return continuacaoQuestao;
+	public List<ImagemDTO> getImagens() {
+		return imagens;
 	}
 
-	public void setContinuacaoQuestao(String continuacaoQuestao) {
-		this.continuacaoQuestao = continuacaoQuestao;
+	public void setImagens(List<ImagemDTO> imagens) {
+		this.imagens = imagens;
 	}	
 	
 	

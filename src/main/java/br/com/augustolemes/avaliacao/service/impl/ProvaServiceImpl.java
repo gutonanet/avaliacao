@@ -6,11 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.augustolemes.avaliacao.dto.DadosProvaTO;
+import br.com.augustolemes.avaliacao.dto.ImagemDTO;
 import br.com.augustolemes.avaliacao.dto.MateriaDTO;
 import br.com.augustolemes.avaliacao.dto.ProvaDTO;
 import br.com.augustolemes.avaliacao.dto.QuestaoDTO;
 import br.com.augustolemes.avaliacao.dto.RespostaDTO;
 import br.com.augustolemes.avaliacao.repository.ProvaRepository;
+import br.com.augustolemes.avaliacao.service.ImagemService;
 import br.com.augustolemes.avaliacao.service.MateriaService;
 import br.com.augustolemes.avaliacao.service.ProvaService;
 import br.com.augustolemes.avaliacao.service.QuestaoService;
@@ -30,6 +32,9 @@ public class ProvaServiceImpl implements ProvaService {
 	
 	@Autowired
 	private RespostaService respostaService; 
+	
+	@Autowired
+	private ImagemService imagemService;
 	
 	 public ProvaDTO findById(Long id) {
 		 return provaRepository.findById(id);
@@ -60,6 +65,11 @@ public class ProvaServiceImpl implements ProvaService {
 			List<RespostaDTO> respostas = respostaService.findByQuestao(questao);
 			if(respostas!= null && !respostas.isEmpty()) {
 				questao.setRespostas(respostas);
+			}
+			
+			List<ImagemDTO> imagens = imagemService.findByQuestao(questao);
+			if(imagens != null && !imagens.isEmpty()) {
+				questao.setImagens(imagens);
 			}
 		}
 		prova.setQuestoes(questoes);

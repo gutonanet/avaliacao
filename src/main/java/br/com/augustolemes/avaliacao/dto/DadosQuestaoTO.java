@@ -7,16 +7,6 @@ public class DadosQuestaoTO {
 	private String habilidade;
 	
 	private String questao;
-	
-	private String continuacaoQuestao;
-	
-	public String getContinuacaoQuestao() {
-		return continuacaoQuestao;
-	}
-
-	public void setContinuacaoQuestao(String continuacaoQuestao) {
-		this.continuacaoQuestao = continuacaoQuestao;
-	}
 
 	private String resposta;
 	
@@ -24,6 +14,11 @@ public class DadosQuestaoTO {
 	
 	private Integer tipoQuestao;
 
+	private String legendaImagem;
+	
+	private Integer posicaoImagem;
+	
+	
 	public Long getIdQuestao() {
 		return idQuestao;
 	}
@@ -70,6 +65,22 @@ public class DadosQuestaoTO {
 
 	public void setHabilidade(String habilidade) {
 		this.habilidade = habilidade;
+	}
+
+	public String getLegendaImagem() {
+		return legendaImagem;
+	}
+
+	public void setLegendaImagem(String legendaImagem) {
+		this.legendaImagem = legendaImagem;
+	}
+
+	public Integer getPosicaoImagem() {
+		return posicaoImagem;
+	}
+
+	public void setPosicaoImagem(Integer posicaoImagem) {
+		this.posicaoImagem = posicaoImagem;
 	}
 	
 	

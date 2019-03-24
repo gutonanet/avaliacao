@@ -6,6 +6,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -22,12 +25,15 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import br.com.augustolemes.avaliacao.dto.AnoEnum;
 import br.com.augustolemes.avaliacao.dto.DadosProvaTO;
 import br.com.augustolemes.avaliacao.dto.DadosQuestaoTO;
+import br.com.augustolemes.avaliacao.dto.ImagemDTO;
 import br.com.augustolemes.avaliacao.dto.MateriaDTO;
+import br.com.augustolemes.avaliacao.dto.PosicaoEnum;
 import br.com.augustolemes.avaliacao.dto.ProvaDTO;
 import br.com.augustolemes.avaliacao.dto.QuestaoDTO;
 import br.com.augustolemes.avaliacao.dto.RespostaDTO;
 import br.com.augustolemes.avaliacao.dto.TipoProvaEnum;
 import br.com.augustolemes.avaliacao.dto.TurmaEnum;
+import br.com.augustolemes.avaliacao.service.ImagemService;
 import br.com.augustolemes.avaliacao.service.MateriaService;
 import br.com.augustolemes.avaliacao.service.ProvaService;
 import br.com.augustolemes.avaliacao.service.ProvaWordService;
@@ -52,8 +58,8 @@ public class ProvaController {
 	@Autowired
 	private ProvaWordService provaWordService;
 	
-    @Value( "${imagem.caminho}" )
-    private String caminhoImagem;
+	@Autowired
+	private ImagemService imagemService;
 	
     @Value( "${template.arquivo}" )
     private String arquivoTemplate;
@@ -111,42 +117,79 @@ public class ProvaController {
     	model.addAttribute("materia",materia);
     	TipoProvaEnum tipo = TipoProvaEnum.getId(dadosProva.getIdTipoProva());
     	model.addAttribute("tipoProva", tipo);
+    	model.addAttribute("posicoes", PosicaoEnum.values());
+
     	
     	try {
         	if(file!= null) {
         		if(!"".equals(file.getOriginalFilename()))
-        			singleFileUpload(q.getId().toString(), file);
+        			singleFileUpload(file, questao.getLegendaImagem(),questao.getPosicaoImagem(), q, mensagemErro, model);
         	}
     	}catch(Exception e) {
     		mensagemErro += " Erro ao efetuar o upload.";
     		model.addAttribute("mensagem",mensagemErro);
-    		e.printStackTrace();
+    		//e.printStackTrace();
     	}
 
 
     	if((mensagemErro== null || "".equals(mensagemErro)) && questao.getResposta()!= null && !"".equals(questao.getResposta())) {
-    		List<RespostaDTO> respostas = respostaService.findByQuestao(questaoDTO);
-    		
-    		if(respostas.size()>=5) {
-    			mensagemErro+=" Cada questão só pode ter no máximo 5 respostas.";
-    	    	model.addAttribute("mensagem",mensagemErro);
-    			
-    		}else {
-        		RespostaDTO resposta = new RespostaDTO();
-        		resposta.setQuestao(questaoDTO);
-        		resposta.setResposta(questao.getResposta());
-        		respostaService.save(resposta);
-    			
-    		}
-    		respostas = respostaService.findByQuestao(questaoDTO);
-    		model.addAttribute("respostas", respostas);
+    		mensagemErro=salvarRespostas(mensagemErro,model, q, questao.getResposta());	
     	}
+    	List<ImagemDTO> imagens = imagemService.findByQuestao(questaoDTO);
+		model.addAttribute("imagens", imagens); 
+		List<RespostaDTO> respostas = respostaService.findByQuestao(questaoDTO);
+		model.addAttribute("respostas", respostas);
+    	
     	if(mensagemErro == null || "".equals(mensagemErro)) {
     	   	model.addAttribute("mensagem","Registro salvo com sucesso.");
     	}
-    	
+
         return "editarQuestoes";
     }
+
+    
+    private String salvarRespostas(String mensagemErro, Model model, QuestaoDTO questaoDTO, String respostaTexto) {
+		List<RespostaDTO> respostas = respostaService.findByQuestao(questaoDTO);
+		
+		if(respostas.size()>=5) {
+			mensagemErro+=" Cada questão só pode ter no máximo 5 respostas.";
+	    	return mensagemErro;
+			
+		}else {
+    		RespostaDTO resposta = new RespostaDTO();
+    		resposta.setQuestao(questaoDTO);
+    		resposta.setResposta(respostaTexto);
+    		respostaService.save(resposta);
+			
+		}
+
+		return mensagemErro;
+	}
+
+ 
+    private String singleFileUpload(MultipartFile file, String legenda, Integer posicao, QuestaoDTO questaoDTO, String mensagemErro, Model model) throws IOException { 	
+		List<ImagemDTO> imagens = imagemService.findByQuestao(questaoDTO);
+		
+		if(imagens.size()>=5) {
+			mensagemErro+=" Cada questão só pode ter no máximo 5 imagens.";
+	    	return mensagemErro;
+		}else {
+	    	ImagemDTO img = new ImagemDTO();
+	 		byte[] imagem = file.getBytes();
+	        img.setImagem(imagem);
+	        img.setNome(file.getOriginalFilename());
+	        img.setLegenda(legenda);
+	        img.setPosicao(posicao);
+	        img.setQuestao(questaoDTO);
+	        imagemService.save(img);
+		}         
+
+		
+		
+		return mensagemErro;
+     }
+
+    
     
     private String validarQuestionario(DadosQuestaoTO questao) {
     	String retorno = null;
@@ -162,6 +205,7 @@ public class ProvaController {
     @RequestMapping(value={"/novaQuestao","/novaQuestao/{id}"}, method = RequestMethod.GET)
     public String novaQuestao(Model model, @PathVariable(required = false, name = "id") Long id) {
     	model.addAttribute("mensagem","");
+    	model.addAttribute("posicoes", PosicaoEnum.values());
     	ProvaDTO prova = provaService.findById(id);
     	DadosProvaTO dadosProva = provaService.converter(prova);
     	model.addAttribute("prova", dadosProva);
@@ -180,6 +224,7 @@ public class ProvaController {
     @RequestMapping(value={"/editarQuestao","/editarQuestao/{id}"}, method = RequestMethod.GET)
     public String editarQuestao(Model model, @PathVariable(required = false, name = "id") Long id) {
     	model.addAttribute("mensagem","");
+    	model.addAttribute("posicoes", PosicaoEnum.values());
     	QuestaoDTO questao = questaoService.findById(id);
     	DadosProvaTO dadosProva = provaService.converter(questao.getProva());
     	model.addAttribute("prova", dadosProva);
@@ -192,6 +237,8 @@ public class ProvaController {
     	model.addAttribute("tipoProva", tipo);
     	List<RespostaDTO> respostas = respostaService.findByQuestao(questao);
 		model.addAttribute("respostas", respostas);
+    	List<ImagemDTO> imagens = imagemService.findByQuestao(questao);
+		model.addAttribute("imagens", imagens);
         return "editarQuestoes";
     }    
 
@@ -223,6 +270,31 @@ public class ProvaController {
     	respostaService.delete(resposta);
     	List<RespostaDTO> respostas = respostaService.findByQuestao(questao);
 		model.addAttribute("respostas", respostas);
+    	List<ImagemDTO> imagens = imagemService.findByQuestao(questao);
+		model.addAttribute("imagens", imagens);
+        return "editarQuestoes";
+    }   
+    
+    @RequestMapping(value={"/imagemDelete","/imagemDelete/{id}"}, method = RequestMethod.GET)
+    public String imagemDelete(Model model, @PathVariable(required = false, name = "id") Long id) {
+    	model.addAttribute("mensagem","");
+    	ImagemDTO imagem = imagemService.findById(id);
+    	QuestaoDTO questao = imagem.getQuestao();
+    	DadosProvaTO dadosProva = provaService.converter(questao.getProva());
+    	model.addAttribute("prova", dadosProva);
+    	DadosQuestaoTO dadosQuestao = questaoService.converter(questao);
+    	dadosQuestao.setIdProva(dadosProva.getIdProva());
+    	model.addAttribute("questao", dadosQuestao);
+    	MateriaDTO materia = materiaService.findById(dadosProva.getIdMateria());
+    	model.addAttribute("materia",materia);
+    	TipoProvaEnum tipo = TipoProvaEnum.getId(dadosProva.getIdTipoProva());
+    	model.addAttribute("tipoProva", tipo);
+    	imagemService.delete(imagem);
+    	List<RespostaDTO> respostas = respostaService.findByQuestao(questao);
+		model.addAttribute("respostas", respostas);
+    	List<ImagemDTO> imagens = imagemService.findByQuestao(questao);
+		model.addAttribute("imagens", imagens);
+		
         return "editarQuestoes";
     }   
     
@@ -241,9 +313,11 @@ public class ProvaController {
     //Upload
 	  //Save the uploaded file to this folder
 
+     
+    /*
 
     public void singleFileUpload(String id, MultipartFile file) throws IOException { 	
-    	
+    		
 
 
             // Get the file and save it somewhere
@@ -254,13 +328,13 @@ public class ProvaController {
 
     }
     
-    
+    */
     @RequestMapping(value={"/imprimir","/imprimir/{id}"}, method = RequestMethod.GET)
-    public String imprimir(Model model, @PathVariable(required = false, name = "id") Long id) {
+    public String imprimir(Model model, @PathVariable(required = false, name = "id") Long id, HttpServletRequest request, HttpServletResponse response) {
     	model.addAttribute("mensagem","");
     	ProvaDTO prova = provaService.findProvaAllData(id);
     	try {
-    		provaWordService.readDocxFile(prova, arquivoTemplate);
+    		provaWordService.readDocxFile(prova, arquivoTemplate, request, response);
     		model.addAttribute("mensagem","Prova gerada com sucesso");
     	}catch (Exception e) {
     		model.addAttribute("mensagem","Erro ao gerar a prova.");

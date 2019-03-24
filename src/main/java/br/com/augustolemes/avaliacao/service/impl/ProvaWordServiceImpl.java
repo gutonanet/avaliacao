@@ -4,10 +4,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.util.Units;
@@ -18,8 +24,12 @@ import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 
+import br.com.augustolemes.avaliacao.dto.ImagemDTO;
+import br.com.augustolemes.avaliacao.dto.PosicaoEnum;
 import br.com.augustolemes.avaliacao.dto.ProvaDTO;
 import br.com.augustolemes.avaliacao.dto.QuestaoDTO;
 import br.com.augustolemes.avaliacao.dto.RespostaDTO;
@@ -28,58 +38,108 @@ import br.com.augustolemes.avaliacao.service.ProvaWordService;
 @Service
 public class ProvaWordServiceImpl implements ProvaWordService {
 
-	@Value("${prova.caminho}")
-	private String caminhoProva;
-
-	@Value("${imagem.caminho}")
-	private String caminhoImagem;
-
-	public void readDocxFile(ProvaDTO prova, String fileName) throws Exception{
+	   @Value( "${imagem.url}" )
+	    private String imagemURL;
 	
-			File file = new File(fileName);
+	public void readDocxFile(ProvaDTO prova, String template, HttpServletRequest request, HttpServletResponse response) throws Exception{
+			Resource resource = new ClassPathResource(template);
+			File file = resource.getFile();
 			FileInputStream fis = new FileInputStream(file.getAbsolutePath());
 			XWPFDocument document = new XWPFDocument(fis);
 			List<QuestaoDTO> questoes = prova.getQuestoes();
 			preencheProva(document, "TURMA", "TURMA: "+prova.getTurma(),null);
 			for (int i = 1; i <= questoes.size(); i++) {
-				String questaoLocalizar = "QUESTAO" + i;
-				String questaoLocalizar2 = "HABILIDADE" + i;
-				String questaoLocalizar3 = "CONTINUACAO" + i;
+				String questaoLocalizar = "QT" + i;
+				String questaoLocalizar2 = "HB" + i;
 				QuestaoDTO questao = questoes.get(i - 1);
 				preencheProva(document, questaoLocalizar2, questao.getHabilidade(),null);
-				preencheProva(document, questaoLocalizar3, questao.getContinuacaoQuestao(),null);
-				boolean atualizou = preencheProva(document, questaoLocalizar, questao.getQuestao(), questao.getId());
+				//preencheProva(document, questaoLocalizar3, questao.getContinuacaoQuestao(),null);
+				boolean atualizou = preencheProva(document, questaoLocalizar, questao.getQuestao(), null);
 				if (atualizou) {
-					List<RespostaDTO> respostas = questao.getRespostasFormatted();
-					for (int ii = 1; ii <= respostas.size(); ii++) {
-						RespostaDTO resposta = respostas.get(ii - 1);
-						String respostaLocalizar = "ALTERNATIVA" + ii;
-						preencheProva(document, respostaLocalizar, resposta.getRespostaFormatted(ii));
-					}
+					
+					adicionarImagens(document,questao, i, request.getRequestURI());
+					adicionarRespostas(document,questao, i);
+
 
 				}
 
 			}
-			removeTabela(document, "QUESTAO");
-			removeLinha(document, "CONTINUACAO");
-			removeLinha(document, "REMOVER");
+			 response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+		     response.setHeader("Content-Disposition", "attachment; filename="+ prova.getTurma()+"_" +prova.getMateria().getNome() + ".docx");
+			//removeTabela(document, "QUESTAO");
+			//removeTabela(document, "CONTINUACAOQUESTAO");
+			//removeLinha(document, "REMOVER");
 
-			document.write(
-					new FileOutputStream(caminhoProva + prova.getTurma()+"_" +prova.getMateria().getNome() + ".docx"));
+			document.write(response.getOutputStream());
 			document.close();
 			fis.close();
 		
 
 	}
 
-	public boolean addImage(XWPFRun run, Long codigoQuestao) throws IOException, InvalidFormatException{
-		File arquivo = locateFile(codigoQuestao);
-		if(arquivo == null) {
-			return false;
+	private void adicionarRespostas(XWPFDocument document, QuestaoDTO questao, Integer questaoIndice) throws InvalidFormatException, IOException {
+		List<RespostaDTO> respostas = questao.getRespostasFormatted();
+		for (int ii = 1; ii <= respostas.size(); ii++) {
+			RespostaDTO resposta = respostas.get(ii - 1);
+			String respostaLocalizar = "ALT"+(questaoIndice+"") + (ii+"");
+			preencheProva(document, respostaLocalizar, resposta.getRespostaFormatted(ii));
 		}
-		FileInputStream is = new FileInputStream(arquivo);
+	}
+	
+	private void adicionarImagens(XWPFDocument document, QuestaoDTO questao, Integer questaoIndice, String url) throws InvalidFormatException, IOException {
+		List<ImagemDTO> imagens = questao.getImagens();
+		List<ImagemDTO> superiores = new ArrayList<>();
+		List<ImagemDTO> inferiores = new ArrayList<>();
+
+		
+		for (int ii = 1; ii <= 5; ii++) {
+			if(ii <= imagens.size() ) {
+				ImagemDTO img = imagens.get(ii - 1);
+				if(img.getPosicao() == PosicaoEnum.SUPERIOR.getId()) {
+					img.setUrl(url);
+					superiores.add(img);
+				}
+			}else {
+				ImagemDTO img = new ImagemDTO();
+				img.setLegenda("REMOVER");
+				superiores.add(img);
+			}
+		}
+		
+		for (int ii = 1; ii <= 5; ii++) {
+			if(ii <= imagens.size() ) {
+				ImagemDTO img = imagens.get(ii - 1);
+				if(img.getPosicao() == PosicaoEnum.INFERIOR.getId()) {
+					img.setUrl(url);
+					inferiores.add(img);
+				}
+			}else {
+				ImagemDTO img = new ImagemDTO();
+				img.setLegenda("REMOVER");
+				inferiores.add(img);
+			}
+		}
+		
+		for (int ii = 1; ii <= superiores.size(); ii++) {
+			ImagemDTO imagem = superiores.get(ii - 1);
+			String textoLocalizar = "SP"+(questaoIndice+"") + (ii+"");
+			preencheProva(document, textoLocalizar, imagem.getLegenda(),imagem );
+		}
+		
+		for (int ii = 1; ii <= inferiores.size(); ii++) {
+			ImagemDTO imagem = inferiores.get(ii - 1);
+			String textoLocalizar = "IF"+(questaoIndice+"") + (ii+"");
+			preencheProva(document, textoLocalizar, imagem.getLegenda(),imagem );
+		}
+		
+	}
+	
+	public boolean addImage(XWPFRun run, ImagemDTO imagem) throws IOException, InvalidFormatException{
+	    String imageUrl = imagemURL+"/"+imagem.getId();
+	    URL url = new URL(imageUrl);
+	    InputStream is = url.openStream();
 		run.addBreak();
-		run.addPicture(is, getTypeImage(arquivo.getName()), arquivo.getAbsolutePath(), Units.toEMU(200), Units.toEMU(200)); // 200x200
+		run.addPicture(is, getTypeImage(imagem.getNome()), imagem.getNome(), Units.toEMU(70), Units.toEMU(70)); // 200x200
 																											// pixels
 		is.close();
 		
@@ -95,15 +155,12 @@ public class ProvaWordServiceImpl implements ProvaWordService {
 			return XWPFDocument.PICTURE_TYPE_PNG;
 		}
 		
-		if(filename.toLowerCase().contains("bmp")) {
-			return XWPFDocument.PICTURE_TYPE_BMP;
-		}
-		
 		return -1;
 		
 		
 	}
 	
+	/*
 	private File locateFile(Long codigoQuestao) {
 		File[] files = new File(caminhoImagem).listFiles();
 		String partName = codigoQuestao+"__";
@@ -115,13 +172,14 @@ public class ProvaWordServiceImpl implements ProvaWordService {
 		}
 		return null;
 	}
+	*/
 
 	public boolean preencheProva(XWPFDocument document, String textoLocalizar, String textoSubstituir) throws IOException, InvalidFormatException{
 		return preencheProva(document, textoLocalizar, textoSubstituir, null);
 	}
 
 	public boolean preencheProva(XWPFDocument document, String textoLocalizar, String textoSubstituir,
-			Long codigoQuestao) throws IOException, InvalidFormatException{
+			ImagemDTO imagem) throws IOException, InvalidFormatException{
 		for (XWPFTable tbl : document.getTables()) {
 			for (XWPFTableRow row : tbl.getRows()) {
 				for (XWPFTableCell cell : row.getTableCells()) {
@@ -131,8 +189,8 @@ public class ProvaWordServiceImpl implements ProvaWordService {
 							if (text != null && text.contains(textoLocalizar)) {
 								text = text.replace(textoLocalizar, textoSubstituir);
 								r.setText(text, 0);
-								if(codigoQuestao != null) {
-									addImage(r, codigoQuestao);
+								if(imagem != null && imagem.getId()!= null) {
+									addImage(r, imagem);
 								}
 								return true;
 							}

@@ -7,11 +7,14 @@
 
 <link rel="stylesheet" type="text/css" media="all"
 	href="../../css/bootstrap.min.css" th:href="@{/css/bootstrap.min.css}" />
+	<link rel="stylesheet" type="text/css" media="all"
+	href="../../css/bootstrap-fileinput.css" th:href="@{/css/bootstrap-fileinput.css}" />
 
 <script type="text/javascript" th:src="@{/js/jquery.min.js}"
 	src="js/jquery.min.js"></script>
 <script type="text/javascript" th:src="@{/js/bootstrap.min.js}"
 	src="js/bootstrap.min.js"></script>
+
 </head>
 <body>
 	<nav class="navbar navbar-default">
@@ -84,13 +87,62 @@
 				<label for="questao">Questão</label> <textarea cols="200" rows="5" maxlength="2500"
 					class="form-control" id="questao" th:field="${questao.questao}"></textarea>
 			</div>
-			<div class="form-group">
-				<label for="file">Imagem</label><input type="file" name="file" accept="image/x-png,image/bmp,image/jpeg" />
+			
+
+			<div class="input-group">
+			  <span class="input-group-btn">
+			    <span class="btn btn-default btn-file">
+			      Selecione... 
+			      <input id="file-upload" data-url="/upload" name="file" type="file" accept="image/x-png,image/jpeg"></input>
+			    </span>
+			  </span>
+			  <input readonly="readonly" id="file-name" class="form-control" type="text"></input>
 			</div>
-			<div class="form-group">
-				<label for="continuacaoQuestao">Continuação Questão (Após imagem)</label> <textarea cols="200" rows="5" maxlength="2500"
-					class="form-control" id="continuacaoQuestao" th:field="${questao.continuacaoQuestao}"></textarea>
+			<div class="form-group blu-margin">
+				<label for="legendaImagem">Legenda Imagem</label> <input type="text"
+					class="form-control" id="legendaImagem" th:field="${questao.legendaImagem}" />
 			</div>
+			<div class="form-group blu-margin">
+				<label for="dropPosicao">Posição da Imagem</label>
+				<select class="form-control" th:field="${questao.posicaoImagem}"
+					id="dropPosicao">
+					<option value="0" th:text="Selecione"></option>
+					<option th:each="pos : ${posicoes}" th:value="${pos.id}"
+						th:text="${pos.descricao}"></option>
+				</select>
+			</div>			
+			
+		<button type="submit" class="btn btn-primary">Adicionar Imagem</button>
+			<table class="table">
+				<thead>
+					<tr>
+						<th>Id</th>
+						<th>Legenda</th>
+						<th>Posição</th>
+						<th>Nome</th>
+						<th>Imagem</th>
+						<th>Ações</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="img : ${imagens}">
+						<td th:text="${img.id}">1</td>
+						<td th:text="${img.legenda}">Test</td>
+						<td th:text="${img.posicaoFormatted}">Test</td>
+						<td th:text="${img.nome}">Test</td>
+						<td><img src="/dbresources/images/1" th:src="@{/dbresources/images/__${img.id}__}" 
+						height="25" width="25"/></td>
+						<td><a class="btn btn-info" href="/imagemDelete/1"
+							th:href="@{/imagemDelete/__${img.id}__}"> <span
+								class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+								Excluir
+						</a></td>
+					</tr>
+				</tbody>
+			</table>			
+			
+
+
 			
 			<button type="submit" class="btn btn-primary">Salvar</button>
 			<a href="/voltarQuestao/1" th:href="@{/voltarQuestao/__${questao.idQuestao}__}" class="btn btn-danger" role="button">Cancelar</a>
@@ -98,7 +150,7 @@
 				<label for="resposta">Resposta</label> <textarea cols="200" rows="5" maxlength="2500"
 					class="form-control" id="resposta" th:field="${questao.resposta}"></textarea>
 			</div>
-			<button type="submit" class="btn btn-primary">Adicionar</button>
+			<button type="submit" class="btn btn-primary">Adicionar Resposta</button>
 			<table class="table">
 				<thead>
 					<tr>
@@ -127,6 +179,24 @@
 
 
 	</div>
+	<script type="text/javascript">
+	var input = document.getElementById( 'file-upload' );
+	var infoArea = document.getElementById( 'file-name' );
 
+	input.addEventListener( 'change', showFileName );
+
+	function showFileName( event ) {
+	  
+	  // the change event gives us the input it occurred in 
+	  var input = event.srcElement;
+	  
+	  // the input has an array of files in the `files` property, each one has a name that you can use. We're just using the name here.
+	  var fileName = input.files[0].name;
+	  
+	  // use fileName however fits your app best, i.e. add it into a div
+	  infoArea.value = fileName;
+	  alert(fileName);
+	}
+	</script>
 </body>
 </html>
