@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.security.CodeSource;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -42,12 +43,21 @@ public class ProvaWordServiceImpl implements ProvaWordService {
 	    private String imagemURL;
 	
 	public void readDocxFile(ProvaDTO prova, String template, HttpServletRequest request, HttpServletResponse response) throws Exception{
+			File file = null;
+			try {
 			Resource resource = new ClassPathResource(template);
-			File file = resource.getFile();
+			file = resource.getFile();
+			}catch(Exception e) {
+				CodeSource codeSource = ProvaWordServiceImpl.class.getProtectionDomain().getCodeSource();
+				String path = codeSource.getLocation().toURI().getPath()+"/"+template;
+				path = path.replaceAll("null/", "");
+				file = new File(path);
+			}
 			FileInputStream fis = new FileInputStream(file.getAbsolutePath());
 			XWPFDocument document = new XWPFDocument(fis);
 			List<QuestaoDTO> questoes = prova.getQuestoes();
-			preencheProva(document, "TURMA", "TURMA: "+prova.getTurma(),null);
+			//preencheProva(document, "TURMA", "TURMA: "+prova.getTurma(),null);
+			preencheProva(document, "FRASE", prova.getFrase(),null);
 			for (int i = 1; i <= questoes.size(); i++) {
 				String questaoLocalizar = "QT" + i;
 				String questaoLocalizar2 = "HB" + i;
@@ -66,9 +76,9 @@ public class ProvaWordServiceImpl implements ProvaWordService {
 			}
 			 response.setContentType("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
 		     response.setHeader("Content-Disposition", "attachment; filename="+ prova.getTurma()+"_" +prova.getMateria().getNome() + ".docx");
-			//removeTabela(document, "QUESTAO");
-			//removeTabela(document, "CONTINUACAOQUESTAO");
-			//removeLinha(document, "REMOVER");
+			removeTabela(document, "QT");
+			removeTabela(document, "ALT");
+			//removeLinha(document, "ALT");
 
 			document.write(response.getOutputStream());
 			document.close();
@@ -98,10 +108,14 @@ public class ProvaWordServiceImpl implements ProvaWordService {
 				if(img.getPosicao() == PosicaoEnum.SUPERIOR.getId()) {
 					img.setUrl(url);
 					superiores.add(img);
+				}else {
+					ImagemDTO img2 = new ImagemDTO();
+					img2.setLegenda("");
+					superiores.add(img2);
 				}
 			}else {
 				ImagemDTO img = new ImagemDTO();
-				img.setLegenda("REMOVER");
+				img.setLegenda("");
 				superiores.add(img);
 			}
 		}
@@ -112,10 +126,14 @@ public class ProvaWordServiceImpl implements ProvaWordService {
 				if(img.getPosicao() == PosicaoEnum.INFERIOR.getId()) {
 					img.setUrl(url);
 					inferiores.add(img);
+				}else{
+					ImagemDTO img2 = new ImagemDTO();
+					img2.setLegenda("");
+					inferiores.add(img2);
 				}
 			}else {
 				ImagemDTO img = new ImagemDTO();
-				img.setLegenda("REMOVER");
+				img.setLegenda("");
 				inferiores.add(img);
 			}
 		}

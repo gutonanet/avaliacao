@@ -118,7 +118,7 @@ public class QuestaoDTO {
 		if(lista5.size() < 5) {
 			for(int i = listaRespostas.size() -1; i < 5; i++) {
 				RespostaDTO dto = new RespostaDTO();
-				dto.setResposta("REMOVER");
+				dto.setResposta("");
 				lista5.add(dto);
 			}
 		}

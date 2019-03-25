@@ -36,6 +36,9 @@ public class RespostaDTO {
 	}
 	
 	public String getRespostaFormatted(Integer indice) {
+		if(resposta == null || "".equals(resposta)) {
+			return "";
+		}
 		String marcador = "";
 			switch(indice) {
 			case 1: marcador = "a) ";break;

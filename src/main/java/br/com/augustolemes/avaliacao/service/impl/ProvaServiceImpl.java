@@ -85,6 +85,7 @@ public class ProvaServiceImpl implements ProvaService {
 		dados.setIdMateria(prova.getMateria().getId());
 		dados.setIdTipoProva(prova.getTipoProva());
 		dados.setTurma(prova.getTurma());
+		dados.setFrase(prova.getFrase());
 		return dados;
 	}
 
@@ -95,6 +96,7 @@ public class ProvaServiceImpl implements ProvaService {
 		prova.setTurma(dados.getTurma());
 		MateriaDTO materia = materiaService.findById(dados.getIdMateria());
 		prova.setMateria(materia);
+		prova.setFrase(dados.getFrase());
 		return prova;
 	}
 	
@@ -107,6 +109,7 @@ public class ProvaServiceImpl implements ProvaService {
 		materia.setId(item.getIdMateria());
 		prova.setMateria(materia);
 		prova.setTurma(item.getTurma());
+		prova.setFrase(item.getFrase());
 		return provaRepository.save(prova);
 	}
 	

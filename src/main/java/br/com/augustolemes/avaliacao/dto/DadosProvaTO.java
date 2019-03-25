@@ -19,6 +19,8 @@ public class DadosProvaTO {
 	private Integer anoLetivo;
 	
 	private String turma;
+	
+	private String frase;
 
 	public Integer getIdTipoProva() {
 		return idTipoProva;
@@ -50,6 +52,14 @@ public class DadosProvaTO {
 
 	public void setAnoLetivo(Integer anoLetivo) {
 		this.anoLetivo = anoLetivo;
+	}
+
+	public String getFrase() {
+		return frase;
+	}
+
+	public void setFrase(String frase) {
+		this.frase = frase;
 	}
 	
 	

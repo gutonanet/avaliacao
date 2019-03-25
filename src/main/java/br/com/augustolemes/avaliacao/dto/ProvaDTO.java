@@ -32,6 +32,9 @@ public class ProvaDTO {
 	
 	@Column
 	private Integer tipoProva;
+	
+	@Column
+	private String frase;
 
 	@Transient
 	private List<QuestaoDTO> questoes;
@@ -83,6 +86,14 @@ public class ProvaDTO {
 
 	public void setQuestoes(List<QuestaoDTO> questoes) {
 		this.questoes = questoes;
+	}
+
+	public String getFrase() {
+		return frase;
+	}
+
+	public void setFrase(String frase) {
+		this.frase = frase;
 	}
 	
 	

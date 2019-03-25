@@ -62,10 +62,14 @@
 			</div>
 			-->
 			
-				<div class="form-group blu-margin">
+			<div class="form-group blu-margin">
 				<label for="turma">Turma</label> <input type="text"
 					class="form-control" id="turma" th:field="${item.turma}" />
-			</div>			
+			</div>
+			<div class="form-group blu-margin">
+				<label for="frase">Frase Reflexiva</label> <input type="text"
+					class="form-control" id="frase" th:field="${item.frase}" />
+			</div>				
 
 			<button type="submit" class="btn btn-primary">Salvar</button>
 			<a href="#" th:href="@{/}" class="btn btn-danger" role="button">Cancelar</a>
