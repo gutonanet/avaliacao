@@ -67,7 +67,7 @@ public class ProvaController {
     
     @RequestMapping("/")
     public String index(Model model) {
-    	model.addAttribute("mensagem","");
+    	//model.addAttribute("mensagem","");
     	model.addAttribute("item", new DadosProvaTO());
     	Iterable<MateriaDTO> listaMaterias = materiaService.findAll();
     	model.addAttribute("materias", listaMaterias);
@@ -79,6 +79,15 @@ public class ProvaController {
     
     @RequestMapping(value="/listaQuestoes", method = RequestMethod.POST)
     public String listaQuestoes(Model model, DadosProvaTO item) {
+    	model.addAttribute("mensagem","");
+    	String mensagemErro = validarProva(item);
+    	if(mensagemErro!= null && !"".equals(mensagemErro)) {
+    	   	model.addAttribute("mensagem",mensagemErro);
+    	   	return index(model);
+    	       		
+    	}
+   
+    	
     	//model.addAttribute("mensagem","");
     	ProvaDTO prova = provaService.findProva(item);
     	model.addAttribute("prova", prova);
@@ -135,10 +144,12 @@ public class ProvaController {
     	if((mensagemErro== null || "".equals(mensagemErro)) && questao.getResposta()!= null && !"".equals(questao.getResposta())) {
     		mensagemErro=salvarRespostas(mensagemErro,model, q, questao.getResposta());	
     	}
-    	List<ImagemDTO> imagens = imagemService.findByQuestao(questaoDTO);
-		model.addAttribute("imagens", imagens); 
-		List<RespostaDTO> respostas = respostaService.findByQuestao(questaoDTO);
-		model.addAttribute("respostas", respostas);
+    	if(q!= null && q.getId()!= null) {
+        	List<ImagemDTO> imagens = imagemService.findByQuestao(q);
+    		model.addAttribute("imagens", imagens); 
+    		List<RespostaDTO> respostas = respostaService.findByQuestao(q);
+    		model.addAttribute("respostas", respostas);
+    	}
     	
     	if(mensagemErro == null || "".equals(mensagemErro)) {
     	   	model.addAttribute("mensagem","Registro salvo com sucesso.");
@@ -199,6 +210,23 @@ public class ProvaController {
     	if(questao.getQuestao() == null || "".equals(questao.getQuestao())) {
     		retorno += " O Campo Questão deve ser preenchido.";
     	}
+    	return retorno;
+    }
+    
+    private String validarProva(DadosProvaTO prova) {
+    	String retorno = "";
+
+    	if(prova.getIdMateria() == null || prova.getIdMateria() == 0 ) {
+    		retorno += " O Campo Matéria deve ser selecionado.";
+    	}
+    	if(prova.getIdTipoProva() == null || prova.getIdTipoProva() == 0) {
+    		retorno += " O Campo Tipo de Prova deve ser selecionado.";
+    	}
+      	if(prova.getTurma() == null || "".equals(prova.getTurma())) {
+    		retorno += " O Campo Turma deve ser preenchido.";
+    	}
+  
+    	
     	return retorno;
     }
     
