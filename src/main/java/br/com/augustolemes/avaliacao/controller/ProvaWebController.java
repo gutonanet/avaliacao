@@ -41,7 +41,7 @@ import br.com.augustolemes.avaliacao.service.QuestaoService;
 import br.com.augustolemes.avaliacao.service.RespostaService;
 
 @Controller
-public class ProvaController {
+public class ProvaWebController {
 	
 	@Autowired
 	private MateriaService materiaService;
