@@ -113,5 +113,22 @@ public class ProvaServiceImpl implements ProvaService {
 		return provaRepository.save(prova);
 	}
 	
+    public String validarProva(DadosProvaTO prova) {
+    	String retorno = "";
+
+    	if(prova.getIdMateria() == null || prova.getIdMateria() == 0 ) {
+    		retorno += " O Campo Matéria deve ser selecionado.";
+    	}
+    	if(prova.getIdTipoProva() == null || prova.getIdTipoProva() == 0) {
+    		retorno += " O Campo Tipo de Prova deve ser selecionado.";
+    	}
+      	if(prova.getTurma() == null || "".equals(prova.getTurma())) {
+    		retorno += " O Campo Turma deve ser preenchido.";
+    	}
+  
+    	
+    	return retorno;
+    }
+	
 	
 }

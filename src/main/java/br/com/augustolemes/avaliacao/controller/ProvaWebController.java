@@ -1,9 +1,5 @@
 package br.com.augustolemes.avaliacao.controller;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -13,14 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import br.com.augustolemes.avaliacao.dto.AnoEnum;
 import br.com.augustolemes.avaliacao.dto.DadosProvaTO;
@@ -80,7 +73,7 @@ public class ProvaWebController {
     @RequestMapping(value="/listaQuestoes", method = RequestMethod.POST)
     public String listaQuestoes(Model model, DadosProvaTO item) {
     	model.addAttribute("mensagem","");
-    	String mensagemErro = validarProva(item);
+    	String mensagemErro = provaService.validarProva(item);
     	if(mensagemErro!= null && !"".equals(mensagemErro)) {
     	   	model.addAttribute("mensagem",mensagemErro);
     	   	return index(model);
@@ -111,7 +104,7 @@ public class ProvaWebController {
     	
     	QuestaoDTO questaoDTO = questaoService.converter(questao, prova);
     	DadosProvaTO dadosProva = provaService.converter(prova);
-    	String mensagemErro = validarQuestionario(questao);
+    	String mensagemErro = questaoService.validarQuestionario(questao);
     	QuestaoDTO q = questaoDTO;
     	if(mensagemErro != null && !"".equals(mensagemErro)) {
     		model.addAttribute("mensagem",mensagemErro);
@@ -132,7 +125,7 @@ public class ProvaWebController {
     	try {
         	if(file!= null) {
         		if(!"".equals(file.getOriginalFilename()))
-        			singleFileUpload(file, questao.getLegendaImagem(),questao.getPosicaoImagem(), q, mensagemErro, model);
+        			mensagemErro += questaoService.singleFileUpload(file, questao.getLegendaImagem(),questao.getPosicaoImagem(), q, mensagemErro);
         	}
     	}catch(Exception e) {
     		mensagemErro += " Erro ao efetuar o upload.";
@@ -142,7 +135,7 @@ public class ProvaWebController {
 
 
     	if((mensagemErro== null || "".equals(mensagemErro)) && questao.getResposta()!= null && !"".equals(questao.getResposta())) {
-    		mensagemErro=salvarRespostas(mensagemErro,model, q, questao.getResposta());	
+    		mensagemErro= questaoService.salvarRespostas(mensagemErro,q, questao.getResposta());	
     	}
     	if(q!= null && q.getId()!= null) {
         	List<ImagemDTO> imagens = imagemService.findByQuestao(q);
@@ -159,77 +152,9 @@ public class ProvaWebController {
     }
 
     
-    private String salvarRespostas(String mensagemErro, Model model, QuestaoDTO questaoDTO, String respostaTexto) {
-		List<RespostaDTO> respostas = respostaService.findByQuestao(questaoDTO);
-		
-		if(respostas.size()>=5) {
-			mensagemErro+=" Cada questão só pode ter no máximo 5 respostas.";
-	    	return mensagemErro;
-			
-		}else {
-    		RespostaDTO resposta = new RespostaDTO();
-    		resposta.setQuestao(questaoDTO);
-    		resposta.setResposta(respostaTexto);
-    		respostaService.save(resposta);
-			
-		}
 
-		return mensagemErro;
-	}
 
  
-    private String singleFileUpload(MultipartFile file, String legenda, Integer posicao, QuestaoDTO questaoDTO, String mensagemErro, Model model) throws IOException { 	
-		List<ImagemDTO> imagens = imagemService.findByQuestao(questaoDTO);
-		
-		if(imagens.size()>=5) {
-			mensagemErro+=" Cada questão só pode ter no máximo 5 imagens.";
-	    	return mensagemErro;
-		}else {
-	    	ImagemDTO img = new ImagemDTO();
-	 		byte[] imagem = file.getBytes();
-	        img.setImagem(imagem);
-	        img.setNome(file.getOriginalFilename());
-	        img.setLegenda(legenda);
-	        img.setPosicao(posicao);
-	        img.setQuestao(questaoDTO);
-	        imagemService.save(img);
-		}         
-
-		
-		
-		return mensagemErro;
-     }
-
-    
-    
-    private String validarQuestionario(DadosQuestaoTO questao) {
-    	String retorno = null;
-    	if(questao.getHabilidade() == null || "".equals(questao.getHabilidade())) {
-    		retorno = " O Campo habilidade deve ser preenchido.";
-    	}
-    	if(questao.getQuestao() == null || "".equals(questao.getQuestao())) {
-    		retorno += " O Campo Questão deve ser preenchido.";
-    	}
-    	return retorno;
-    }
-    
-    private String validarProva(DadosProvaTO prova) {
-    	String retorno = "";
-
-    	if(prova.getIdMateria() == null || prova.getIdMateria() == 0 ) {
-    		retorno += " O Campo Matéria deve ser selecionado.";
-    	}
-    	if(prova.getIdTipoProva() == null || prova.getIdTipoProva() == 0) {
-    		retorno += " O Campo Tipo de Prova deve ser selecionado.";
-    	}
-      	if(prova.getTurma() == null || "".equals(prova.getTurma())) {
-    		retorno += " O Campo Turma deve ser preenchido.";
-    	}
-  
-    	
-    	return retorno;
-    }
-    
     @RequestMapping(value={"/novaQuestao","/novaQuestao/{id}"}, method = RequestMethod.GET)
     public String novaQuestao(Model model, @PathVariable(required = false, name = "id") Long id) {
     	model.addAttribute("mensagem","");

@@ -1,16 +1,20 @@
 package br.com.augustolemes.avaliacao.service.impl;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import br.com.augustolemes.avaliacao.dto.DadosQuestaoTO;
+import br.com.augustolemes.avaliacao.dto.ImagemDTO;
 import br.com.augustolemes.avaliacao.dto.MateriaDTO;
 import br.com.augustolemes.avaliacao.dto.ProvaDTO;
 import br.com.augustolemes.avaliacao.dto.QuestaoDTO;
 import br.com.augustolemes.avaliacao.dto.RespostaDTO;
 import br.com.augustolemes.avaliacao.repository.QuestaoRepository;
+import br.com.augustolemes.avaliacao.service.ImagemService;
 import br.com.augustolemes.avaliacao.service.QuestaoService;
 import br.com.augustolemes.avaliacao.service.RespostaService;
 
@@ -22,6 +26,8 @@ public class QuestaoServiceImpl implements QuestaoService{
 	
 	@Autowired
 	private RespostaService respostaService;
+	
+	private ImagemService imagemService;
 	
 	public List<QuestaoDTO> findByProva(ProvaDTO prova){
 		return questaoRepository.findByProva(prova);
@@ -67,6 +73,59 @@ public class QuestaoServiceImpl implements QuestaoService{
 
 	}
 	
+    
+    public String validarQuestionario(DadosQuestaoTO questao) {
+    	String retorno = null;
+    	if(questao.getHabilidade() == null || "".equals(questao.getHabilidade())) {
+    		retorno = " O Campo habilidade deve ser preenchido.";
+    	}
+    	if(questao.getQuestao() == null || "".equals(questao.getQuestao())) {
+    		retorno += " O Campo Questão deve ser preenchido.";
+    	}
+    	return retorno;
+    }
+    
+    
+    public String singleFileUpload(MultipartFile file, String legenda, Integer posicao, QuestaoDTO questaoDTO, String mensagemErro) throws IOException { 	
+		List<ImagemDTO> imagens = imagemService.findByQuestao(questaoDTO);
+		
+		if(imagens.size()>=5) {
+			mensagemErro+=" Cada questão só pode ter no máximo 5 imagens.";
+	    	return mensagemErro;
+		}else {
+	    	ImagemDTO img = new ImagemDTO();
+	 		byte[] imagem = file.getBytes();
+	        img.setImagem(imagem);
+	        img.setNome(file.getOriginalFilename());
+	        img.setLegenda(legenda);
+	        img.setPosicao(posicao);
+	        img.setQuestao(questaoDTO);
+	        imagemService.save(img);
+		}         
+
+		
+		
+		return mensagemErro;
+     }
+	
+    public String salvarRespostas(String mensagemErro, QuestaoDTO questaoDTO, String respostaTexto) {
+		List<RespostaDTO> respostas = respostaService.findByQuestao(questaoDTO);
+		
+		if(respostas.size()>=5) {
+			mensagemErro+=" Cada questão só pode ter no máximo 5 respostas.";
+	    	return mensagemErro;
+			
+		}else {
+    		RespostaDTO resposta = new RespostaDTO();
+    		resposta.setQuestao(questaoDTO);
+    		resposta.setResposta(respostaTexto);
+    		respostaService.save(resposta);
+			
+		}
+
+		return mensagemErro;
+	}
+    
 	public QuestaoRepository getQuestaoRepository() {
 		return questaoRepository;
 	}

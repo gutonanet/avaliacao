@@ -1,17 +1,30 @@
 package br.com.augustolemes.avaliacao.controller;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
+import br.com.augustolemes.avaliacao.dto.DadosProvaTO;
+import br.com.augustolemes.avaliacao.dto.DadosQuestaoTO;
+import br.com.augustolemes.avaliacao.dto.ImagemDTO;
 import br.com.augustolemes.avaliacao.dto.MateriaDTO;
+import br.com.augustolemes.avaliacao.dto.PosicaoEnum;
+import br.com.augustolemes.avaliacao.dto.ProvaDTO;
 import br.com.augustolemes.avaliacao.dto.QuestaoDTO;
+import br.com.augustolemes.avaliacao.dto.RespostaDTO;
 import br.com.augustolemes.avaliacao.dto.TipoProvaEnum;
+import br.com.augustolemes.avaliacao.exception.BusinessException;
 import br.com.augustolemes.avaliacao.service.ImagemService;
 import br.com.augustolemes.avaliacao.service.MateriaService;
 import br.com.augustolemes.avaliacao.service.ProvaService;
@@ -35,8 +48,6 @@ public class ProvaApiController {
 	@Autowired
 	private RespostaService respostaService;
 	
-	@Autowired
-	private ProvaWordService provaWordService;
 	
 	@Autowired
 	private ImagemService imagemService;
@@ -51,9 +62,65 @@ public class ProvaApiController {
 		return Arrays.asList(TipoProvaEnum.values());
 	}
 	
+	@PostMapping("/listarQuestoes")
+	public List<QuestaoDTO> listarQuestoes(@RequestBody DadosProvaTO prova) throws BusinessException{
+		String mensagem = provaService.validarProva(prova);
+		if(mensagem != null && !"".equals(mensagem)) {
+			throw new BusinessException(mensagem);
+		}
+		ProvaDTO provaDTO = provaService.findProva(prova);
+		return provaDTO.getQuestoes();
+	}
 	
-
 	
+	@PostMapping("/questaoSalvar")
+	public void questaoSalvar(@RequestBody DadosQuestaoTO questao,  @RequestParam("file") MultipartFile file) throws BusinessException{
+		ProvaDTO prova = provaService.findById(questao.getIdProva());
+    	QuestaoDTO questaoDTO = questaoService.converter(questao, prova);
+    	String mensagemErro = questaoService.validarQuestionario(questao);
+    	QuestaoDTO q = questaoDTO;
+    	if(mensagemErro != null && !"".equals(mensagemErro)) {
+    		throw new BusinessException(mensagemErro);
+    	}else {
+    		q = questaoService.save(questaoDTO);	
+    	}
+    	try {
+        	if(file!= null) {
+        		if(!"".equals(file.getOriginalFilename()))
+        			mensagemErro += questaoService.singleFileUpload(file, questao.getLegendaImagem(),questao.getPosicaoImagem(), q, mensagemErro);
+        	}
+    	}catch(Exception e) {
+    		mensagemErro += " Erro ao efetuar o upload.";
+    	}
+    	
+    	if((mensagemErro== null || "".equals(mensagemErro)) && questao.getResposta()!= null && !"".equals(questao.getResposta())) {
+    		mensagemErro=questaoService.salvarRespostas(mensagemErro, q, questao.getResposta());	
+    	}
+    	
+    	if(mensagemErro!= null && !"".equals(mensagemErro)) {
+    		throw new BusinessException(mensagemErro);
+    	}
+    	
+	}
+	
+    @GetMapping("/questaoDelete/{id}")
+    public void questaoDelete(@PathVariable Long id) {
+    	QuestaoDTO questao = questaoService.findById(id);
+    	questaoService.deleteQuestao(questao);
+    	
+    }
+    
+    @GetMapping("/respostaDelete/{id}")
+    public void respostaDelete(@PathVariable Long id) {
+    	RespostaDTO resposta = respostaService.findById(id);
+    	respostaService.delete(resposta);
+    }   
+    
+    @GetMapping("/imagemDelete/{id}")
+    public void imagemDelete(@PathVariable Long id) {
+    	ImagemDTO imagem = imagemService.findById(id);
+    	imagemService.delete(imagem);
+    }  
 	
 	
 	
