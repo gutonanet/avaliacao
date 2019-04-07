@@ -1,5 +1,6 @@
 package br.com.augustolemes.avaliacao.controller;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,6 +25,7 @@ import br.com.augustolemes.avaliacao.dto.ProvaDTO;
 import br.com.augustolemes.avaliacao.dto.QuestaoDTO;
 import br.com.augustolemes.avaliacao.dto.RespostaDTO;
 import br.com.augustolemes.avaliacao.dto.TipoProvaEnum;
+import br.com.augustolemes.avaliacao.dto.TipoProvaTO;
 import br.com.augustolemes.avaliacao.exception.BusinessException;
 import br.com.augustolemes.avaliacao.service.ImagemService;
 import br.com.augustolemes.avaliacao.service.MateriaService;
@@ -58,18 +60,26 @@ public class ProvaApiController {
 	}
 	
 	@GetMapping("/tiposProva")
-	public List<TipoProvaEnum> tiposProva(){
-		return Arrays.asList(TipoProvaEnum.values());
+	public List<TipoProvaTO> tiposProva(){
+		List<TipoProvaTO> lista = new ArrayList<>();
+		for(TipoProvaEnum e:TipoProvaEnum.values()) {
+			lista.add(e.getTO());
+		}
+		return lista;
 	}
 	
 	@PostMapping("/listarQuestoes")
-	public List<QuestaoDTO> listarQuestoes(@RequestBody DadosProvaTO prova) throws BusinessException{
+	public List<QuestaoDTO> listarQuestoes(@RequestParam String tipoProva, @RequestParam String materia, @RequestParam String turma, @RequestParam String frase ) throws BusinessException{
+		String t = "";
+		t = "";
+		/*
 		String mensagem = provaService.validarProva(prova);
 		if(mensagem != null && !"".equals(mensagem)) {
 			throw new BusinessException(mensagem);
 		}
 		ProvaDTO provaDTO = provaService.findProva(prova);
-		return provaDTO.getQuestoes();
+		*/
+		return null;
 	}
 	
 	

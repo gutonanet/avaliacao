@@ -42,4 +42,13 @@ public enum TipoProvaEnum {
 		return null;
 	}
 	
+	public TipoProvaTO getTO() {
+		TipoProvaTO t = new TipoProvaTO();
+		t.setId(getId());
+		t.setNome(getNome());
+		
+		return t;
+	}
+	
+	
 }
