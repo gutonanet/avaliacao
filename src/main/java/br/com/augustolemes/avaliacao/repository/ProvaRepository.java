@@ -1,7 +1,5 @@
 package br.com.augustolemes.avaliacao.repository;
 
-import java.util.List;
-
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,5 +12,5 @@ public interface ProvaRepository extends CrudRepository<ProvaDTO, Long> {
 	ProvaDTO findById(Long id);
 	
 	//List<ProvaDTO> findByTurmaAndAnoLetivo(String turma, Integer anoLetivo);
-	List<ProvaDTO> findByTurma(String turma);
+	ProvaDTO findByTurmaAndTipoProvaAndMateria(String turma, Integer tipoProva, MateriaDTO nateria);
 }

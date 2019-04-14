@@ -68,18 +68,27 @@ public class ProvaApiController {
 		return lista;
 	}
 	
-	@PostMapping("/listarQuestoes")
-	public List<QuestaoDTO> listarQuestoes(@RequestParam String tipoProva, @RequestParam String materia, @RequestParam String turma, @RequestParam String frase ) throws BusinessException{
-		String t = "";
-		t = "";
-		/*
-		String mensagem = provaService.validarProva(prova);
-		if(mensagem != null && !"".equals(mensagem)) {
-			throw new BusinessException(mensagem);
-		}
-		ProvaDTO provaDTO = provaService.findProva(prova);
-		*/
-		return null;
+	@PostMapping("/findProva")
+	public DadosProvaTO findProva(@RequestParam String tipoProva, @RequestParam String materia, @RequestParam String turma, @RequestParam String frase ) throws BusinessException{
+		
+		TipoProvaEnum tipo = TipoProvaEnum.getNome(tipoProva);
+		List<MateriaDTO> materias = materiaService.findByNome(materia);
+		DadosProvaTO dados = new DadosProvaTO();
+		dados.setFrase(frase);
+		dados.setTurma(turma);
+		dados.setIdMateria(materias.get(0).getId());
+		dados.setIdTipoProva(tipo.getId());
+    	
+    	String mensagemErro = provaService.validarProva(dados);
+    	if(mensagemErro!= null && !"".equals(mensagemErro)) {
+    	   	throw new BusinessException(mensagemErro);
+    	       		
+    	}
+
+    	ProvaDTO prova = provaService.save(dados);
+    	dados.setIdProva(prova.getId());
+    	
+		return dados;
 	}
 	
 	

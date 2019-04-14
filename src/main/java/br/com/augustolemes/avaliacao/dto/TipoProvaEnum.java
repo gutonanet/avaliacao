@@ -42,6 +42,18 @@ public enum TipoProvaEnum {
 		return null;
 	}
 	
+	public static TipoProvaEnum getNome(String nome) {
+		if(nome == null) {
+			return null;
+		}
+		for(TipoProvaEnum tipo:TipoProvaEnum.values()) {
+			if(tipo.getNome().equals(nome)) {
+				return tipo;
+			}
+		}
+		return null;
+	}
+	
 	public TipoProvaTO getTO() {
 		TipoProvaTO t = new TipoProvaTO();
 		t.setId(getId());

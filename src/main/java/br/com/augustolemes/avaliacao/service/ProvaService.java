@@ -16,5 +16,7 @@ public interface ProvaService {
 	ProvaDTO findProvaAllData(Long id);
 	
     String validarProva(DadosProvaTO prova);
+    
+    ProvaDTO save(DadosProvaTO item);
 	
 }

@@ -41,21 +41,23 @@ public class ProvaServiceImpl implements ProvaService {
 	 }
 	
 	public ProvaDTO findProva(DadosProvaTO dados){
-		List<ProvaDTO> lista =  provaRepository.findByTurma(dados.getTurma());
-    	if(lista!= null && !lista.isEmpty()) {
-    		for(ProvaDTO prova:lista) {
-    			if(prova.getMateria().getId().equals(dados.getIdMateria())&&
-    				prova.getTipoProva().equals(dados.getIdTipoProva())	) {
+		
+		ProvaDTO prova =  getProva(dados);
+    	
+    			if(prova!= null) {
     		    	List<QuestaoDTO> questoes = questaoService.findByProva(prova);
     		    	prova.setQuestoes(questoes);
     		    	return prova;
     			}
-    		}
-    	}
     	
-    	ProvaDTO prova = save(dados);
+    	prova = save(dados);
     	
 		return prova;
+	}
+	
+	private ProvaDTO getProva(DadosProvaTO dados) {
+		MateriaDTO materia = materiaService.findById(dados.getIdMateria());
+		return provaRepository.findByTurmaAndTipoProvaAndMateria(dados.getTurma(), dados.getIdTipoProva(), materia);
 	}
 	
 	public ProvaDTO findProvaAllData(Long id) {
@@ -101,8 +103,14 @@ public class ProvaServiceImpl implements ProvaService {
 	}
 	
 	
-	private ProvaDTO save(DadosProvaTO item) {
-		ProvaDTO prova = new ProvaDTO();
+	public ProvaDTO save(DadosProvaTO item) {
+		
+		
+		ProvaDTO prova = getProva(item);
+		if(prova!=null) {
+			return prova;
+		}
+		prova = new ProvaDTO();
 		//prova.setAnoLetivo(item.getAnoLetivo());
 		prova.setTipoProva(item.getIdTipoProva());
 		MateriaDTO materia = new MateriaDTO();

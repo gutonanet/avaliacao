@@ -36,6 +36,9 @@ public class MateriaServiceImpl implements MateriaService{
 		return lista;
 	}
 	
+	public List<MateriaDTO> findByNome(String nome){
+		return materiaRepository.findByNome(nome);
+	}
 	
 	private void populaMaterias(List<MateriaDTO> lista) {
 		/*

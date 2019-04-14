@@ -1,6 +1,15 @@
 package br.com.augustolemes.avaliacao.dto;
 
-public class DadosProvaTO {
+import java.io.Serializable;
+
+public class DadosProvaTO implements Serializable {
+	
+	
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6972020643202104035L;
 
 	public Long getIdMateria() {
 		return idMateria;
