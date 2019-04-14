@@ -85,6 +85,21 @@ public class QuestaoServiceImpl implements QuestaoService{
     	return retorno;
     }
     
+  
+    public String validarQuestionario(QuestaoDTO questao) {
+    	String retorno = null;
+    	if(questao.getHabilidade() == null || "".equals(questao.getHabilidade())) {
+    		retorno = " O Campo habilidade deve ser preenchido.";
+    	}
+    	if(questao.getQuestao() == null || "".equals(questao.getQuestao())) {
+    		retorno += " O Campo Questão deve ser preenchido.";
+    	}
+    	if(questao.getProva() == null || questao.getProva().getId() == null) {
+    		retorno += " A questão deve estar associada a uma prova.";
+    	}
+
+    	return retorno;
+    }
     
     public String singleFileUpload(MultipartFile file, String legenda, Integer posicao, QuestaoDTO questaoDTO, String mensagemErro) throws IOException { 	
 		List<ImagemDTO> imagens = imagemService.findByQuestao(questaoDTO);

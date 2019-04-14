@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import br.com.augustolemes.avaliacao.dto.DadosProvaTO;
 import br.com.augustolemes.avaliacao.dto.DadosQuestaoTO;
+import br.com.augustolemes.avaliacao.dto.DadosRespostaTO;
 import br.com.augustolemes.avaliacao.dto.ImagemDTO;
 import br.com.augustolemes.avaliacao.dto.MateriaDTO;
 import br.com.augustolemes.avaliacao.dto.PosicaoEnum;
@@ -105,35 +106,77 @@ public class ProvaApiController {
 		return lista;
 	}
 	
-	@PostMapping("/questaoSalvar")
-	public void questaoSalvar(@RequestBody DadosQuestaoTO questao,  @RequestParam("file") MultipartFile file) throws BusinessException{
-		ProvaDTO prova = provaService.findById(questao.getIdProva());
-    	QuestaoDTO questaoDTO = questaoService.converter(questao, prova);
-    	String mensagemErro = questaoService.validarQuestionario(questao);
-    	QuestaoDTO q = questaoDTO;
+	@PostMapping("/salvarQuestao")
+	public DadosQuestaoTO questaoSalvar(@RequestParam String idQuestao, @RequestParam String questao, @RequestParam String habilidade, @RequestParam String idProva) throws BusinessException{
+		Long idP = Long.valueOf(idProva);
+		Long idQ = Long.valueOf(idQuestao);
+    	QuestaoDTO questaoDTO = null;
+    	QuestaoDTO q = null;
+    			
+    	if(idQ != null && !idQ.equals(0L)) {
+    		questaoDTO = questaoService.findById(idQ);
+    	}else {
+    		questaoDTO = new QuestaoDTO();
+    		ProvaDTO prova = new ProvaDTO();
+    		prova.setId(idP);
+    		questaoDTO.setProva(prova);
+    	}
+    	questaoDTO.setQuestao(questao);
+    	questaoDTO.setHabilidade(habilidade);
+    	String mensagemErro = questaoService.validarQuestionario(questaoDTO);
     	if(mensagemErro != null && !"".equals(mensagemErro)) {
     		throw new BusinessException(mensagemErro);
     	}else {
     		q = questaoService.save(questaoDTO);	
     	}
-    	try {
-        	if(file!= null) {
-        		if(!"".equals(file.getOriginalFilename()))
-        			mensagemErro += questaoService.singleFileUpload(file, questao.getLegendaImagem(),questao.getPosicaoImagem(), q, mensagemErro);
-        	}
-    	}catch(Exception e) {
-    		mensagemErro += " Erro ao efetuar o upload.";
-    	}
-    	
-    	if((mensagemErro== null || "".equals(mensagemErro)) && questao.getResposta()!= null && !"".equals(questao.getResposta())) {
-    		mensagemErro=questaoService.salvarRespostas(mensagemErro, q, questao.getResposta());	
-    	}
-    	
-    	if(mensagemErro!= null && !"".equals(mensagemErro)) {
-    		throw new BusinessException(mensagemErro);
-    	}
+  
+    	DadosQuestaoTO qt = questaoService.converter(q);
+    	return qt;
     	
 	}
+	
+	@PostMapping("/listarRespostas")
+	public List<DadosRespostaTO> listarRespostas(@RequestParam String idQuestao){
+		QuestaoDTO q = new QuestaoDTO();
+		Long id = Long.valueOf(idQuestao);
+		q.setId(id);
+		List<RespostaDTO> listaTemp = respostaService.findByQuestao(q);
+		List<DadosRespostaTO> lista = new ArrayList<>();
+		for(RespostaDTO r: listaTemp) {
+			DadosRespostaTO dr = respostaService.converter(r);
+			lista.add(dr);		
+		}
+		return lista;
+	}
+
+	@PostMapping("/salvarResposta")
+	public DadosRespostaTO respostaSalvar(@RequestParam String idQuestao, @RequestParam String resposta,  @RequestParam String idResposta) throws BusinessException{
+		Long idR = Long.valueOf(idResposta);
+		Long idQ = Long.valueOf(idQuestao);
+    	RespostaDTO respostaDTO = null;
+    	RespostaDTO r = null;
+    			
+    	if(idR != null && !idR.equals(0L)) {
+    		respostaDTO = respostaService.findById(idR);
+    	}else {
+    		respostaDTO = new RespostaDTO();
+    		QuestaoDTO questao = new QuestaoDTO();
+    		questao.setId(idQ);
+    		respostaDTO.setQuestao(questao);
+    	}
+    	respostaDTO.setResposta(resposta);
+    	String mensagemErro = respostaService.validarResposta(respostaDTO);
+    	if(mensagemErro != null && !"".equals(mensagemErro)) {
+    		throw new BusinessException(mensagemErro);
+    	}else {
+    		r = respostaService.save(respostaDTO);	
+    	}
+  
+    	DadosRespostaTO dr = respostaService.converter(r);
+    	return dr;
+    	
+	}
+	
 	
     @GetMapping("/questaoDelete/{id}")
     public void questaoDelete(@PathVariable Long id) {
@@ -141,19 +184,14 @@ public class ProvaApiController {
     	questaoService.deleteQuestao(questao);
     	
     }
+
+    
     
     @GetMapping("/respostaDelete/{id}")
     public void respostaDelete(@PathVariable Long id) {
     	RespostaDTO resposta = respostaService.findById(id);
     	respostaService.delete(resposta);
     }   
-    
-    @GetMapping("/imagemDelete/{id}")
-    public void imagemDelete(@PathVariable Long id) {
-    	ImagemDTO imagem = imagemService.findById(id);
-    	imagemService.delete(imagem);
-    }  
-	
-	
+
 	
 }

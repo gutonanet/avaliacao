@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import br.com.augustolemes.avaliacao.dto.DadosQuestaoTO;
+import br.com.augustolemes.avaliacao.dto.DadosRespostaTO;
 import br.com.augustolemes.avaliacao.dto.QuestaoDTO;
 import br.com.augustolemes.avaliacao.dto.RespostaDTO;
 import br.com.augustolemes.avaliacao.repository.RespostaRepository;
@@ -34,6 +36,21 @@ public class RespostaServiceImpl implements RespostaService{
 	public RespostaDTO findById(Long id) {
 		return respostaRepository.findOne(id);
 	}
-	
-	
+
+	public DadosRespostaTO converter(RespostaDTO resposta) {
+		DadosRespostaTO dados = new DadosRespostaTO();
+		dados.setIdQuestao(resposta.getQuestao().getId());
+		dados.setIdResposta(resposta.getId());
+		dados.setResposta(resposta.getResposta());
+		return dados;
+	}
+
+    public String validarResposta(RespostaDTO resposta) {
+    	String retorno = null;
+    	if(resposta.getResposta() == null || "".equals(resposta.getResposta())) {
+    		retorno = " O Campo resposta deve ser preenchido.";
+    	}
+    	return retorno;
+    }
+
 }

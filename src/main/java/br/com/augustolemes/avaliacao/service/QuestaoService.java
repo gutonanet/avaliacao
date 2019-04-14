@@ -29,4 +29,6 @@ public interface QuestaoService {
 	
 	String salvarRespostas(String mensagemErro, QuestaoDTO questaoDTO, String respostaTexto);
 	
+	String validarQuestionario(QuestaoDTO questao);
+
 }
