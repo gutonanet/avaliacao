@@ -91,6 +91,19 @@ public class ProvaApiController {
 		return dados;
 	}
 	
+	@PostMapping("/listarQuestoes")
+	public List<DadosQuestaoTO> listarQuestoes(@RequestParam String idProva){
+		ProvaDTO p = new ProvaDTO();
+		Long id = Long.valueOf(idProva);
+		p.setId(id);
+		List<QuestaoDTO> listaTemp = questaoService.findByProva(p);
+		List<DadosQuestaoTO> lista = new ArrayList<>();
+		for(QuestaoDTO q: listaTemp) {
+			DadosQuestaoTO d = questaoService.converter(q);
+			lista.add(d);		
+		}
+		return lista;
+	}
 	
 	@PostMapping("/questaoSalvar")
 	public void questaoSalvar(@RequestBody DadosQuestaoTO questao,  @RequestParam("file") MultipartFile file) throws BusinessException{

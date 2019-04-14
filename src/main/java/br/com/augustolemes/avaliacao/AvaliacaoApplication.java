@@ -9,5 +9,7 @@ public class AvaliacaoApplication extends SpringBootServletInitializer{
 
 	public static void main(String[] args) {
 		SpringApplication.run(AvaliacaoApplication.class, args);
+		
+
 	}
 }
