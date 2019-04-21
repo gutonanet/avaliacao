@@ -177,21 +177,43 @@ public class ProvaApiController {
     	
 	}
 	
-	
-    @GetMapping("/questaoDelete/{id}")
-    public void questaoDelete(@PathVariable Long id) {
-    	QuestaoDTO questao = questaoService.findById(id);
-    	questaoService.deleteQuestao(questao);
-    	
-    }
+	@PostMapping("/excluirResposta")
+	public DadosRespostaTO respostaExcluir(@RequestParam String idResposta) throws BusinessException{
+		Long idR = Long.valueOf(idResposta);
+    	RespostaDTO respostaDTO = null;
+    	RespostaDTO r = null;
+    	DadosRespostaTO dr = null;		
+    	if(idR != null && !idR.equals(0L)) {
+    		respostaDTO = respostaService.findById(idR);
+        	dr = respostaService.converter(respostaDTO);
 
-    
-    
-    @GetMapping("/respostaDelete/{id}")
-    public void respostaDelete(@PathVariable Long id) {
-    	RespostaDTO resposta = respostaService.findById(id);
-    	respostaService.delete(resposta);
-    }   
+    	}else {
+    		throw new BusinessException("ID da resposta é inválido.");
+    	}
+    		respostaService.delete(respostaDTO);	
+    	return dr;
+    	
+	}
+	
+
+	@PostMapping("/excluirQuestao")
+	public DadosQuestaoTO questaoExcluir(@RequestParam String idQuestao) throws BusinessException{
+		Long idQ = Long.valueOf(idQuestao);
+    	QuestaoDTO questaoDTO = null;
+    	DadosQuestaoTO qt = null;
+    			
+    	if(idQ != null && !idQ.equals(0L)) {
+    		questaoDTO = questaoService.findById(idQ);
+    		qt = questaoService.converter(questaoDTO);
+    	}else {
+    		throw new BusinessException("Id da questão é inválido");
+    	}
+    		questaoService.deleteQuestao(questaoDTO);	
+
+    	return qt;
+    	
+	}
+
 
 	
 }
