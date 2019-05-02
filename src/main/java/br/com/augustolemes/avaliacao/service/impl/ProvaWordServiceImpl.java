@@ -43,18 +43,19 @@ public class ProvaWordServiceImpl implements ProvaWordService {
 	    private String imagemURL;
 	
 	public void readDocxFile(ProvaDTO prova, String template, HttpServletRequest request, HttpServletResponse response) throws Exception{
-			File file = null;
+			InputStream file = null;
+			File fileF = null;
 			try {
-			Resource resource = new ClassPathResource(template);
-			file = resource.getFile();
+			
+			file = getFileFromResources(template);
 			}catch(Exception e) {
 				CodeSource codeSource = ProvaWordServiceImpl.class.getProtectionDomain().getCodeSource();
 				String path = codeSource.getLocation().toURI().getPath()+"/"+template;
 				path = path.replaceAll("null/", "");
-				file = new File(path);
+				fileF = new File(path);
+				file = new FileInputStream(fileF.getAbsolutePath());
 			}
-			FileInputStream fis = new FileInputStream(file.getAbsolutePath());
-			XWPFDocument document = new XWPFDocument(fis);
+			XWPFDocument document = new XWPFDocument(file);
 			List<QuestaoDTO> questoes = prova.getQuestoes();
 			//preencheProva(document, "TURMA", "TURMA: "+prova.getTurma(),null);
 			preencheProva(document, "FRASE", prova.getFrase(),null);
@@ -82,10 +83,24 @@ public class ProvaWordServiceImpl implements ProvaWordService {
 
 			document.write(response.getOutputStream());
 			document.close();
-			fis.close();
+
 		
 
 	}
+	
+    // get file from classpath, resources folder
+    private InputStream getFileFromResources(String fileName) {
+
+        ClassLoader classLoader = getClass().getClassLoader();
+
+        InputStream input = classLoader.getResourceAsStream(fileName);
+        if (input == null) {
+            throw new IllegalArgumentException("file is not found!");
+        }
+        return input;
+
+    }
+
 
 	private void adicionarRespostas(XWPFDocument document, QuestaoDTO questao, Integer questaoIndice) throws InvalidFormatException, IOException {
 		List<RespostaDTO> respostas = questao.getRespostasFormatted();

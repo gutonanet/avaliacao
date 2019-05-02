@@ -27,6 +27,7 @@ public class QuestaoServiceImpl implements QuestaoService{
 	@Autowired
 	private RespostaService respostaService;
 	
+	@Autowired
 	private ImagemService imagemService;
 	
 	public List<QuestaoDTO> findByProva(ProvaDTO prova){

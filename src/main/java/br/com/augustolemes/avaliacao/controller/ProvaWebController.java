@@ -130,7 +130,7 @@ public class ProvaWebController {
     	}catch(Exception e) {
     		mensagemErro += " Erro ao efetuar o upload.";
     		model.addAttribute("mensagem",mensagemErro);
-    		//e.printStackTrace();
+    		e.printStackTrace();
     	}
 
 

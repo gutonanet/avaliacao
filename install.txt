@@ -1,0 +1,3 @@
+mvn clean package -DskipTests
+heroku buildpacks:clear --app avaliacao1
+heroku deploy:jar target/avaliacao-0.0.1-SNAPSHOT.war --app avaliacao1
